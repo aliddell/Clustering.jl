@@ -60,6 +60,9 @@ module Clustering
     # MCL
     mcl, MCLResult
 
+    # DPCluster
+    dpcluster, DPClusterResult
+
     ## source files
 
     include("utils.jl")

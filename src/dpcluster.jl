@@ -27,8 +27,7 @@ function _isdistmatrix(D::DenseMatrix{T}) where T <: Real
     (m == n) && issymmetric(D) && all(D .≥ 0)
 end
 
-# distance matrix version
-# distance matrix version
+# use distance matrix
 function dpcluster(D::DenseMatrix{T},
                    distcut::Real,
                    ρcut::Real,
@@ -47,10 +46,12 @@ function dpcluster(D::DenseMatrix{T},
     _dpcluster(LinearAlgebra.Symmetric(D), distcut, ρcut, δcut, maxiter, displevel)
 end
 
+# local density computation
 function ρ(D::LinearAlgebra.Symmetric, distcut::Real)
     densities = sum(D .< distcut, dims=1)[:]
 end
 
+# nearest neighbor of higher density
 function δ(D::LinearAlgebra.Symmetric, densities::Array{Int64, 1})
     function _nn(D::LinearAlgebra.Symmetric, L::BitArray{2}, i::Integer)
         denserpoints = L[:, i] # all neighbors of higher density
@@ -69,6 +70,7 @@ function δ(D::LinearAlgebra.Symmetric, densities::Array{Int64, 1})
     mindists, nearestneighbors
 end
 
+# core implementation
 function _dpcluster(D::LinearAlgebra.Symmetric,
                     distcut::Real,
                     ρcut::Real,
@@ -105,7 +107,7 @@ function _dpcluster(D::LinearAlgebra.Symmetric,
     assignments[centers] = 1:length(centers)
     iters = 0
     for i = 1:maxiter
-        unassigned = (assignments .== 0) # points which have not been assigned yet
+        unassigned = (assignments .== 0) # find points which have not been assigned yet
         hasneighbor = assignments[nearestneighbors[unassigned]] .> 0 # have nearest neighbors with assignments
         toassign = findall(unassigned)[hasneighbor] # indices of these points in global space
         nniter = nearestneighbors[toassign] # nearest neighbors for these points
